@@ -3,37 +3,28 @@ use strict;
 use warnings;
 
 sub checkArgumentInput {
-    die "\nUsage: $0 [filename.txt].\n\n"
-	if @_ != 1;
+    if (@_ != 2) {
+	die "\nUsage: $0 [IP:PORT] [NickName]\n\n"
+    }
+    elsif ($_[0] !~ /:/) {
+	die "\nUsage: [IP:PORT] [NickName]\n\n";
+    }
 
-    die "\nPlease use a source file with the '.txt' extension: "
-	.$_[0]."\n\n" if (index($_[0], ".txt") == -1);
+    my $column = ':';
+    my @numberOfOccurences = $_[0] =~ /$column/g;
+
+    if (@numberOfOccurences > 1) {
+	die "\nUsage: [IP:PORT] please do not use more than one column\n\n";
+    }
+
+    # we use 2 as a number in split, into two fields
+    my ($ip, $port) = split(/:/, $_[0], 2);
+
+    print "IP: $ip\n";
+    print "Port: $port\n";
+
     return;
 }
 
-sub processInputAsciiFile {
-    my ($non_blank_lines, $chars) = 0;
-    open(my $fh, "<", $_[0] )
-    	or die "Cannot open '$_[0]': $!";
-
-    while(<$fh>){
-	$non_blank_lines++;
-	$chars += length($_);
-	chomp $_;
-	print $_ . "\n";
-    }
-
-    close($fh)
-	or die "File '$_[0]' close failed: $!";
-
-    print "The number of lines: '"
-	.$non_blank_lines
-	."' and number of characters: '"
-	.$chars."'\n";
-
-    return "\nCaution: the total number of characters includes the '\\n' new line character\n\n";
-}
-
-checkArgumentInput(@ARGV);
-print(processInputAsciiFile($ARGV[0]));
+checkArgumentInput( @ARGV );
 exit 0;
